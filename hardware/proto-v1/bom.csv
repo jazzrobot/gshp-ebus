@@ -1,0 +1,22 @@
+Designator,Qty,Value,Function,Source,Notes
+BR1,4,1N4007,Polarity bridge rectifier,BOJACK diode assortment kit,Use four discrete diodes wired as a full-wave bridge
+DZ2,1,1N4733 5.1V 1W zener,Bus-side supply zener,Zener diode assortment kit,Sets +5V_EBUS rail from rectified bus voltage
+DZ1,1,1N4728 3.3V 1W zener,SENSE node clamp,Zener diode assortment kit,Protects LM393 comparator input from CMR violation
+U1,1,LM393 DIP-8,Dual comparator (one channel used),BOJACK IC assortment kit,Channel 2 unused — both inputs tied to VREF
+OK1,1,PC817 DIP-4,Optocoupler / isolation barrier,BOJACK IC assortment kit,Replaces CNY17-4; DIP-4 pinout differs — wire manually on breadboard
+R_supply_A,1,1k,Bus supply current limit (half),Resistor kit (second list),Series with R_supply_B to share power dissipation
+R_supply_B,1,470R,Bus supply current limit (half),Resistor kit (second list),Series with R_supply_A; combined 1.47k limits zener current
+R1,1,100k 1%,Sense divider top,Resistor kit (second list) + separate order,High-value sense input — keeps bus loading near zero
+R2,1,15k 1%,Sense divider bottom,Resistor kit (second list),Sets sense scaling with R1
+R3,1,22k 1%,VREF divider top,Resistor kit (second list),Sets bus-side switching threshold
+R4_A,1,10k 1%,VREF divider bottom (part 1 of 2),Resistor kit (second list),Series with R4_B to make 11k total
+R4_B,1,1k 1%,VREF divider bottom (part 2 of 2),Separate order,Series with R4_A to make 11k total
+R5,1,470k 1%,Hysteresis feedback,Resistor kit (second list),Feeds comparator output back to SENSE; ~1V bus-level hysteresis
+R6,1,10k,Comparator output pull-up,Resistor kit (second list),Bus-side pull-up for LM393 open-collector output
+R7,1,1.5k,Optocoupler LED current limit,Resistor kit (second list),Sets LED drive ~2.3 mA; 1.2k is ideal but 1.5k is within safe range
+R8,1,4.7k,Logic-side pull-up,Resistor kit (second list),Pulls EBUS_RX high on the ESP32 side
+R9,1,100R,ESP RX series resistor,Resistor kit (second list),ESD and edge damping on ESP32 input
+C1,1,100 nF ceramic,VREF filter,Capacitor stock,Place close to R3/R4 junction
+C2,1,100 nF ceramic,U1 local decoupling,Capacitor stock,Place close to LM393 VCC pin
+C3,1,100 uF electrolytic 25V,Bus-side bulk storage,Capacitor stock,Sustains supply during consecutive LOW bits at 2400 baud
+C5,1,100 nF ceramic,Bus-side local decoupling,Capacitor stock,Additional HF decoupling near DZ2

@@ -1,0 +1,22 @@
+Designator,Qty,Value,Function,Preferred Part,Package,Notes
+J1,1,2-pin 5.08 mm,eBUS input terminal,Generic 2-pin 5.08 mm screw terminal,THT,Board-edge connector for the live bus pair
+BR1,1,Bridge rectifier,Polarity-tolerant eBUS entry,Discrete M7 diodes or bridge package,Discrete or vendor-specific,Discrete diodes are easiest to substitute during bring-up
+DZ1,1,1N4728 3.3V 1W zener,SENSE node clamp,Any 1N4728 equivalent,SOD-41 or DO-35,Protects U1 comparator input against CMR violation from bus transients
+U3,1,5V to 5V isolated 1 W DC-DC,Bus-side isolated supply,Murata MEV1S0505SC or Traco TME 0505S,SIP module,Verify footprint from the datasheet before PCB layout; specialist order required
+U1,1,LM2903B or LM393B,Comparator,Texas Instruments LM2903BIDR,SOIC-8,Channel 1 used; channel 2 — both inputs tied to VREF; OUT2 left unconnected
+OK1,1,CNY17-4,Isolation barrier on RX,Vishay CNY17-4,DIP-6,Non-Darlington transistor-output optocoupler; PC817 is a valid substitute (different pinout)
+R1,1,100k 1%,Sense divider top,Generic resistor,0805,Bus-side high-value sense input
+R2,1,15k 1%,Sense divider bottom,Generic resistor,0805,Sets sense scaling with R1
+R3,1,22k 1%,VREF divider top,Generic resistor,0805,Sets bus-side switching threshold
+R4,1,11k 1%,VREF divider bottom,Generic resistor,0805,Sets bus-side switching threshold; build as 10k + 1k in series if 11k unavailable
+R5,1,470k 1%,Hysteresis feedback,Generic resistor,0805,Adds roughly 1 V of bus-level hysteresis
+R6,1,10k 1%,Comparator pull-up,Generic resistor,0805,Bus-side pull-up for open-collector output
+R7,1,1.2k 1%,Optocoupler LED resistor,Generic resistor,0805,Sets LED current on bus side; 1.5k acceptable if 1.2k unavailable
+R8,1,4.7k 1%,Logic-side pull-up,Generic resistor,0805,Pulls EBUS_RX high on the ESP side
+R9,1,100R,ESP RX series resistor,Generic resistor,0805,Protection and edge damping on ESP32 input
+C1,1,100 nF,VREF filter,Generic capacitor X7R 25 V,0805,Place close to R3 and R4
+C2,1,100 nF,U1 local decoupling,Generic capacitor X7R 25 V,0805,Place close to U1 VCC pin
+C3,1,10 uF,Bus-side bulk decoupling,Generic capacitor X7R or electrolytic,1206 or radial,Place near U3 output
+C4,1,10 uF,Safe-side bulk decoupling,Generic capacitor X7R or electrolytic,1206 or radial,Place near U3 input
+J2,1,1x4 header,Logic and power header to host board,Generic 1x4 2.54 mm pin header,THT,Recommended pinout SAFE_5V GND_LOGIC 3V3_LOGIC ESP_RX
+TP1-TP8,8,Test points,Bring-up and probing,Generic test pads,SMT or THT,Expose VBUS_POS SENSE VREF U1A_OUT +5V_EBUS GND_EBUS EBUS_RX GND_LOGIC
