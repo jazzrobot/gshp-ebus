@@ -4,8 +4,9 @@ DZ2,1,1N4733 5.1V 1W zener,Bus-side supply zener,Zener diode assortment kit,Sets
 DZ1,1,1N4728 3.3V 1W zener,SENSE node clamp,Zener diode assortment kit,Protects LM393 comparator input from CMR violation
 U1,1,LM393 DIP-8,Dual comparator (one channel used),BOJACK IC assortment kit,Channel 2 unused — both inputs tied to VREF
 OK1,1,PC817 DIP-4,Optocoupler / isolation barrier,BOJACK IC assortment kit,Replaces CNY17-4; DIP-4 pinout differs — wire manually on breadboard
-R_supply_A,1,1k 1W,Bus supply current limit (upper series resistor),AUKENIEN 1W resistor kit,Extra thermal margin on the higher-dissipation half of the dropper chain
-R_supply_B,1,470R 1/4W,Bus supply current limit (lower series resistor),1/4W resistor stock,Series with R_supply_A; combined 1.47k limits zener current and 470R remains comfortably within rating
+R_supply,1,1.5k 1W,Bus supply current limit (preferred current rebuild),AUKENIEN 1W resistor kit,Preferred current proto-v1 rebuild part; replaces the older split 1k plus 470R dropper with a near-equivalent single resistor
+R_supply_A,1,1k 1W,Bus supply current limit (archived split variant),AUKENIEN 1W resistor kit,Only needed if recreating the older archived 1k plus 470R dropper chain
+R_supply_B,1,470R 1/4W,Bus supply current limit (archived split variant),1/4W resistor stock,Only needed if recreating the older archived 1k plus 470R dropper chain
 R1,1,100k 1% 1/4W,Sense divider top,1/4W resistor stock,High-value sense input — keeps bus loading near zero
 R2,1,15k 1% 1/4W,Sense divider bottom,1/4W resistor stock,Sets sense scaling with R1
 R3,1,22k 1% 1/4W,VREF divider top,1/4W resistor stock,Sets bus-side switching threshold

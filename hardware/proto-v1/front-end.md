@@ -91,7 +91,7 @@ BR1 = 4x 1N4007  (polarity bridge)
 
                    BUS-SIDE POWER SUPPLY
 
-+VBUS o---- R_supply (1k + 470R in series) ----+----o +5V_EBUS
++VBUS o---- R_supply (1.5k 1W preferred; 1k + 470R equivalent) ----+----o +5V_EBUS
                                                |
                                               DZ2  1N4733 (5.1 V, 1 W)
                                                |
@@ -100,10 +100,10 @@ VBUS- o--------------GND_EBUS-----------------+
 C3 100 uF electrolytic from +5V_EBUS to GND_EBUS  (bulk storage)
 C5 100 nF ceramic from +5V_EBUS to GND_EBUS  (local decoupling)
 
-Note: for the current stocked build, use `R_supply_A = 1k 1W` and
-      `R_supply_B = 470R 1/4 W`. The 1k part carries the larger share of
-      the dissipation, so the 1W part adds thermal margin. Tie `GND_EBUS`
-      to `VBUS-`.
+Note: for the current proto-v1 rebuild, use a single `R_supply = 1.5k 1W`.
+      The earlier split `R_supply_A = 1k 1W` plus `R_supply_B = 470R 1/4 W`
+      chain is electrically close enough to be treated as an equivalent
+      archived variant. Tie `GND_EBUS` to `VBUS-`.
 
 
                    RECEIVE DETECTOR
@@ -199,7 +199,7 @@ drooping significantly.
 
 During bus LOW (~9–12 V post-bridge), the supply headroom is lower. At 9 V
 post-bridge and ~8 V effective across `R_supply`:
-- supply current ≈ (8 V − 5.1 V) / 1.47k ≈ 2.0 mA
+- supply current ≈ (8 V − 5.1 V) / 1.5k ≈ 1.9 mA
 - comparator draws ~0.5 mA
 - LED draws ~3.0 mA (from +5V_EBUS via R7 when comparator sinks)
 
@@ -208,12 +208,12 @@ LOW run (10 consecutive bits) is ~4.2 ms. Even with `R7 = 1.2k`, the rail
 droops by only about `0.06-0.07 V` over that window — negligible for
 comparator and opto performance.
 
-Power dissipation in `R_supply` (1k + 470R series):
-- at 20 V bus idle: ~129 mW total, split as roughly `88 mW` in the `1k` and `41 mW` in the `470R`
-- at 24 V theoretical max: ~218 mW total, split as roughly `148 mW` in the `1k` and `70 mW` in the `470R`
+Power dissipation in `R_supply` (`1.5k 1W` preferred current build):
+- at 20 V bus idle: about `125-130 mW`
+- at 24 V theoretical max: about `210-215 mW`
 
-For the stocked build, use the `1k 1W` part for extra thermal margin and keep
-the `470R` as a `1/4 W` resistor.
+The older split `1k 1W` plus `470R 1/4 W` chain remains a valid near-equivalent
+archived variant if you want to mirror the first pass exactly.
 
 ---
 

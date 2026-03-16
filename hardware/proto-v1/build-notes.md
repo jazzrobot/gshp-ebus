@@ -136,11 +136,20 @@ There are now three levels of detail in the proto documentation:
 If you are building from the breadboard guide, use the table below as the quick-reference
 view and keep [bom.csv](./bom.csv) open alongside it.
 
-For the current stocked build:
+For the current proto-v1 rebuild:
 
-- `R_supply_A` uses the `1k 1W` part
+- `R_supply` uses a single `1.5k 1W` part
 - `R7` uses the `1.2k 1/2W` part
 - all other resistors remain `1/4W`
+
+The older archived first-pass layout below used a split dropper chain:
+
+- `R_supply_A = 1k 1W`
+- `R_supply_B = 470R 1/4W`
+
+That older split chain is electrically close to the current single `1.5k 1W`
+choice, but the single resistor is now the preferred build because it is simpler
+and matches the part you are actually using.
 
 Because the `1W` and `1/2W` parts have larger bodies, it is fine to shift a lead to any
 electrically equivalent hole on the same row if that makes the breadboard build cleaner.
@@ -176,6 +185,13 @@ Result:
 - left `-` rail is `GND_EBUS`
 
 ### Bus-powered supply
+
+For the current rebuild, the preferred bus-side dropper is:
+
+- `R_supply` (`1.5k 1W`): `+VBUS -> +5V_EBUS`
+
+The archived row-by-row placement immediately below shows the older split
+`R_supply_A + R_supply_B` variant from the first pass.
 
 Series current limit:
 
@@ -304,8 +320,9 @@ Use this as the literal insertion guide for the physical component leads.
 | `D2` | `1N4007` diode | `E10` | `F10` | anode at `E10`, cathode at `F10`, stripe towards `F10` |
 | `D3` | `1N4007` diode | `B14` | `B6` | anode at `B14`, cathode at `B6`, stripe towards `B6` |
 | `D4` | `1N4007` diode | `D18` | `D10` | anode at `D18`, cathode at `D10`, stripe towards `D10` |
-| `R_supply_A` | `1k 1W` resistor | `H22` | `H18` | upper resistor in the `1.47k` series supply chain |
-| `R_supply_B` | `470R 1/4W` resistor | `J18` | `J20` | lower resistor in the `1.47k` series supply chain |
+| `R_supply` | `1.5k 1W` resistor | custom node-to-node | custom node-to-node | preferred current rebuild part between `+VBUS` and `+5V_EBUS` |
+| `R_supply_A` | `1k 1W` resistor | `H22` | `H18` | archived upper resistor in the older `1.47k` split supply chain |
+| `R_supply_B` | `470R 1/4W` resistor | `J18` | `J20` | archived lower resistor in the older `1.47k` split supply chain |
 | `R1` | `100k 1/4W` resistor | `E22` | `B26` | `+VBUS` to `SENSE` |
 | `R2` | `15k 1/4W` resistor | `C26` | left `-` rail | `SENSE` to `GND_EBUS` |
 | `DZ1` | `1N4728 3.3V` zener | left `-` rail | `D26` | anode to `GND_EBUS`, cathode to `D26`, stripe at `D26` |
