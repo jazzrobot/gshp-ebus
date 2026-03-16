@@ -1,6 +1,6 @@
 # Firmware
 
-This directory holds firmware plans and, later, source code for the ESP32 listener.
+This directory holds firmware notes and source code for the ESP32 listener.
 
 ## Current target
 
@@ -17,3 +17,4 @@ This directory holds firmware plans and, later, source code for the ESP32 listen
 ## Layout
 
 - [esp32-s3-poe/README.md](esp32-s3-poe/README.md) - board-specific notes
+- [esp32-s3-poe/current/README.md](esp32-s3-poe/current/README.md) - current passive listener implementation

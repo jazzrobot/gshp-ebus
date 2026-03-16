@@ -1,6 +1,12 @@
 # ESP32-S3 PoE
 
-This board is the planned MVP listener platform because it offers stable power and a straightforward network path for later phases.
+This board family is the planned MVP listener platform because it offers stable power and a straightforward network path for later phases.
+
+The current bring-up target is the Waveshare `ESP32-S3-ETH`, wired as a passive listener with:
+
+- `GPIO16` as the receive pin from the isolated front-end
+- `3V3` on pin `36` feeding the breadboard logic rail
+- `GND` on pin `38` feeding the breadboard logic return rail
 
 ## Intended use
 

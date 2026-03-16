@@ -11,6 +11,21 @@ crosses the isolation barrier. The PC817 optocoupler is the sole isolation bound
 For the next iteration (Proto v2 / isolated DC-DC variant) see
 [../proto-v2/front-end.md](../proto-v2/front-end.md).
 
+## Implementation note
+
+The **schematic in this document remains the source of truth**.
+
+The first hole-by-hole breadboard layout used for bring-up proved too pin-centric and too
+easy to mis-wire around the `LM393` and its `VREF` / `SENSE` nets. The next `proto-v1`
+rebuild should therefore be done in a **node-first** style:
+
+- build and label `+VBUS`, `GND_EBUS`, `+5V_EBUS`, `VREF`, `SENSE`, `U1A_OUT`, `EBUS_RX`, and `ESP_RX` as separate probeable nodes
+- then run short jumpers from those nodes to the IC pins
+- avoid converging multiple breadboard nets directly on the comparator pins where practical
+
+See [bench-tests/2026-03-15-bring-up.md](bench-tests/2026-03-15-bring-up.md) for the first
+bring-up record and the issues discovered in the original layout.
+
 ---
 
 ## Safety verification
@@ -85,9 +100,10 @@ VBUS- o--------------GND_EBUS-----------------+
 C3 100 uF electrolytic from +5V_EBUS to GND_EBUS  (bulk storage)
 C5 100 nF ceramic from +5V_EBUS to GND_EBUS  (local decoupling)
 
-Note: R_supply uses two series resistors (1k + 470R = 1.47k) so each
-      resistor stays within its 1/4 W rating at the top of the bus voltage range.
-      Tie GND_EBUS to VBUS-.
+Note: for the current stocked build, use `R_supply_A = 1k 1W` and
+      `R_supply_B = 470R 1/4 W`. The 1k part carries the larger share of
+      the dissipation, so the 1W part adds thermal margin. Tie `GND_EBUS`
+      to `VBUS-`.
 
 
                    RECEIVE DETECTOR
@@ -102,7 +118,7 @@ DZ1  1N4728 (3.3 V) from SENSE to GND_EBUS  (SENSE node clamp)
 
 +5V_EBUS o---- R3 22k ----+----o VREF
                           |
-                         R4  10k + 1k in series (= 11k total)
+                         R4  11k
                           |
 GND_EBUS o----------------+
                           |
@@ -132,7 +148,7 @@ C2 100 nF from Pin 8 to Pin 4, placed close to U1.
 
 +5V_EBUS o---- R6 10k ----+----o U1A_OUT
                            |
-+5V_EBUS o---- R7 1.5k ----|>|----+
++5V_EBUS o---- R7 1.2k ----|>|----+
                            OK1 LED side
                            (Pin 1 = Anode, Pin 2 = Cathode)
 
@@ -185,15 +201,19 @@ During bus LOW (~9–12 V post-bridge), the supply headroom is lower. At 9 V
 post-bridge and ~8 V effective across `R_supply`:
 - supply current ≈ (8 V − 5.1 V) / 1.47k ≈ 2.0 mA
 - comparator draws ~0.5 mA
-- LED draws ~2.3 mA (from +5V_EBUS via R7 when comparator sinks)
+- LED draws ~3.0 mA (from +5V_EBUS via R7 when comparator sinks)
 
 `C3` (100 µF) bridges the shortfall. At 2400 baud, the longest realistic
-LOW run (10 consecutive bits) is ~4.2 ms. The rail droops by at most ~0.14 V
-over that window — negligible for comparator and opto performance.
+LOW run (10 consecutive bits) is ~4.2 ms. Even with `R7 = 1.2k`, the rail
+droops by only about `0.06-0.07 V` over that window — negligible for
+comparator and opto performance.
 
 Power dissipation in `R_supply` (1k + 470R series):
-- at 20 V bus idle: ~129 mW shared across two resistors (~65 mW each) — fine for 1/4 W parts
-- at 24 V theoretical max: ~218 mW shared (~109 mW each) — within 1/4 W rating
+- at 20 V bus idle: ~129 mW total, split as roughly `88 mW` in the `1k` and `41 mW` in the `470R`
+- at 24 V theoretical max: ~218 mW total, split as roughly `148 mW` in the `1k` and `70 mW` in the `470R`
+
+For the stocked build, use the `1k 1W` part for extra thermal margin and keep
+the `470R` as a `1/4 W` resistor.
 
 ---
 
