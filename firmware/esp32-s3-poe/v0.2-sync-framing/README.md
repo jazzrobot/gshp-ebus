@@ -1,10 +1,8 @@
-# Current Listener Build
+# v0.2 Sync Framing
 
-This directory is the latest stable alias for the active listener build.
+This is the first versioned listener iteration after successful live eBUS capture on the Waveshare `ESP32-S3-ETH`.
 
-At the moment it mirrors [../v0.2-sync-framing/README.md](../v0.2-sync-framing/README.md), which is the first versioned iteration after successful live eBUS capture.
-
-This is the current `proto-v1` passive listener build for the Waveshare `ESP32-S3-ETH` board.
+It snapshots the `proto-v1` passive listener build at the point where sync-aware framing around `0xAA` was introduced.
 
 ## What this build does
 

@@ -43,6 +43,10 @@ extern "C" {
 #define EBUS_EVENT_QUEUE_LENGTH 32
 #endif
 
+#ifndef EBUS_LOG_RX_BYTES
+#define EBUS_LOG_RX_BYTES 0
+#endif
+
 namespace {
 
 constexpr uart_port_t kEbusUart = static_cast<uart_port_t>(EBUS_UART_PORT);
@@ -55,6 +59,9 @@ constexpr int kDriverRxBuffer = EBUS_DRIVER_RX_BUFFER;
 constexpr size_t kFrameBufferBytes = EBUS_FRAME_BUFFER_BYTES;
 constexpr int kEventQueueLength = EBUS_EVENT_QUEUE_LENGTH;
 constexpr uint8_t kEbusSyncByte = 0xAA;
+constexpr bool kLogRxBytes = EBUS_LOG_RX_BYTES != 0;
+constexpr size_t kSignatureBytes = 8;
+constexpr size_t kFrameFamilyCapacity = 24;
 
 QueueHandle_t g_uartQueue = nullptr;
 uint8_t g_frameBuffer[kFrameBufferBytes];
@@ -63,10 +70,22 @@ int64_t g_frameStartUs = 0;
 int64_t g_lastByteUs = 0;
 uint32_t g_lastSummaryMs = 0;
 
+struct FrameFamily {
+  bool inUse = false;
+  uint8_t signature[kSignatureBytes] = {};
+  size_t signatureLength = 0;
+  uint32_t seenCount = 0;
+  size_t lastFrameLength = 0;
+  int64_t lastSeenUs = 0;
+  uint32_t lastGapUs = 0;
+  uint64_t totalGapUs = 0;
+};
+
 struct ListenerStats {
   uint64_t totalBytes = 0;
   uint64_t frameCount = 0;
   uint32_t syncOnlyFrames = 0;
+  uint32_t suppressedRxByteLogs = 0;
   uint32_t frameTruncations = 0;
   uint32_t dataEvents = 0;
   uint32_t fifoOverflows = 0;
@@ -78,6 +97,7 @@ struct ListenerStats {
 };
 
 ListenerStats g_stats;
+FrameFamily g_frameFamilies[kFrameFamilyCapacity];
 
 void waitForUsbSerial() {
   const uint32_t startMs = millis();
@@ -95,6 +115,105 @@ void printHexBytes(const uint8_t *buffer, size_t length) {
   }
 }
 
+size_t getSignatureLength(size_t frameLength) {
+  return min(frameLength, kSignatureBytes);
+}
+
+void printSignature(const uint8_t *buffer, size_t length) {
+  const size_t signatureLength = getSignatureLength(length);
+  printHexBytes(buffer, signatureLength);
+}
+
+size_t countFrameFamilies() {
+  size_t count = 0;
+  for (const FrameFamily &family : g_frameFamilies) {
+    if (family.inUse) {
+      ++count;
+    }
+  }
+
+  return count;
+}
+
+size_t findFrameFamily(const uint8_t *buffer, size_t length) {
+  const size_t signatureLength = getSignatureLength(length);
+
+  for (size_t index = 0; index < kFrameFamilyCapacity; ++index) {
+    const FrameFamily &family = g_frameFamilies[index];
+    if (!family.inUse || family.signatureLength != signatureLength) {
+      continue;
+    }
+
+    bool matches = true;
+    for (size_t sigIndex = 0; sigIndex < signatureLength; ++sigIndex) {
+      if (family.signature[sigIndex] != buffer[sigIndex]) {
+        matches = false;
+        break;
+      }
+    }
+
+    if (matches) {
+      return index;
+    }
+  }
+
+  return kFrameFamilyCapacity;
+}
+
+size_t createFrameFamily(const uint8_t *buffer, size_t length) {
+  const size_t signatureLength = getSignatureLength(length);
+
+  for (size_t index = 0; index < kFrameFamilyCapacity; ++index) {
+    FrameFamily &family = g_frameFamilies[index];
+    if (family.inUse) {
+      continue;
+    }
+
+    family.inUse = true;
+    family.signatureLength = signatureLength;
+    for (size_t sigIndex = 0; sigIndex < signatureLength; ++sigIndex) {
+      family.signature[sigIndex] = buffer[sigIndex];
+    }
+
+    return index;
+  }
+
+  return kFrameFamilyCapacity;
+}
+
+size_t getOrCreateFrameFamily(const uint8_t *buffer, size_t length) {
+  const size_t existingIndex = findFrameFamily(buffer, length);
+  if (existingIndex < kFrameFamilyCapacity) {
+    return existingIndex;
+  }
+
+  return createFrameFamily(buffer, length);
+}
+
+void printFrameFamilySummaries() {
+  for (size_t index = 0; index < kFrameFamilyCapacity; ++index) {
+    const FrameFamily &family = g_frameFamilies[index];
+    if (!family.inUse) {
+      continue;
+    }
+
+    uint32_t avgGapUs = 0;
+    if (family.seenCount > 1) {
+      avgGapUs = static_cast<uint32_t>(
+          family.totalGapUs / static_cast<uint64_t>(family.seenCount - 1));
+    }
+
+    Serial.printf("[family] id=%u sig=", static_cast<unsigned>(index + 1));
+    printSignature(family.signature, family.signatureLength);
+    Serial.printf(
+        " seen=%u last_len=%u last_gap_us=%u avg_gap_us=%u\n",
+        family.seenCount,
+        static_cast<unsigned>(family.lastFrameLength),
+        family.lastGapUs,
+        avgGapUs);
+  }
+}
+
 void flushFrame(const char *reason) {
   if (g_frameLength == 0) {
     return;
@@ -109,13 +228,45 @@ void flushFrame(const char *reason) {
 
   ++g_stats.frameCount;
   const int64_t endUs = g_lastByteUs;
+  const size_t familyIndex = getOrCreateFrameFamily(g_frameBuffer, g_frameLength);
+  uint32_t familySeenCount = 0;
+  uint32_t familyDeltaUs = 0;
+  uint32_t familyAvgGapUs = 0;
+
+  if (familyIndex < kFrameFamilyCapacity) {
+    FrameFamily &family = g_frameFamilies[familyIndex];
+    if (family.seenCount > 0 && family.lastSeenUs > 0) {
+      familyDeltaUs = static_cast<uint32_t>(g_frameStartUs - family.lastSeenUs);
+      family.lastGapUs = familyDeltaUs;
+      family.totalGapUs += familyDeltaUs;
+    }
+
+    family.lastSeenUs = g_frameStartUs;
+    family.lastFrameLength = g_frameLength;
+    familySeenCount = ++family.seenCount;
+
+    if (family.seenCount > 1) {
+      familyAvgGapUs = static_cast<uint32_t>(
+          family.totalGapUs / static_cast<uint64_t>(family.seenCount - 1));
+    }
+  }
 
   Serial.printf(
-      "[frame] reason=%s start_us=%llu end_us=%llu len=%u data=",
+      "[frame] reason=%s family=%u seen=%u",
       reason,
+      familyIndex < kFrameFamilyCapacity ? static_cast<unsigned>(familyIndex + 1) : 0U,
+      familySeenCount);
+  if (familyDeltaUs > 0) {
+    Serial.printf(" delta_us=%u avg_gap_us=%u", familyDeltaUs, familyAvgGapUs);
+  }
+
+  Serial.printf(
+      " start_us=%llu end_us=%llu len=%u sig=",
       static_cast<unsigned long long>(g_frameStartUs),
       static_cast<unsigned long long>(endUs),
       static_cast<unsigned>(g_frameLength));
+  printSignature(g_frameBuffer, g_frameLength);
+  Serial.print(" data=");
   printHexBytes(g_frameBuffer, g_frameLength);
   Serial.println();
 
@@ -161,11 +312,20 @@ void handleIncomingBytes(size_t byteCount) {
       appendByteToFrame(buffer[index], timestampUs);
       g_stats.totalBytes++;
 
-      Serial.printf(
-          "[rx] t_us=%llu byte=0x%02X total=%llu\n",
-          static_cast<unsigned long long>(timestampUs),
-          buffer[index],
-          static_cast<unsigned long long>(g_stats.totalBytes));
+      const bool suppressSyncByteLog =
+          (buffer[index] == kEbusSyncByte) &&
+          (g_frameLength == 1) &&
+          (g_frameBuffer[0] == kEbusSyncByte);
+
+      if (!kLogRxBytes || suppressSyncByteLog) {
+        ++g_stats.suppressedRxByteLogs;
+      } else {
+        Serial.printf(
+            "[rx] t_us=%llu byte=0x%02X total=%llu\n",
+            static_cast<unsigned long long>(timestampUs),
+            buffer[index],
+            static_cast<unsigned long long>(g_stats.totalBytes));
+      }
     }
 
     byteCount -= static_cast<size_t>(readCount);
@@ -176,11 +336,13 @@ void printSummary() {
   const uint32_t uptimeMs = millis();
 
   Serial.printf(
-      "[stats] up_ms=%lu bytes=%llu frames=%llu sync_only=%u trunc=%u frame_err=%u parity_err=%u fifo_ovf=%u buffer_full=%u breaks=%u unknown=%u\n",
+      "[stats] up_ms=%lu bytes=%llu frames=%llu families=%u sync_only=%u rx_supp=%u trunc=%u frame_err=%u parity_err=%u fifo_ovf=%u buffer_full=%u breaks=%u unknown=%u\n",
       static_cast<unsigned long>(uptimeMs),
       static_cast<unsigned long long>(g_stats.totalBytes),
       static_cast<unsigned long long>(g_stats.frameCount),
+      static_cast<unsigned>(countFrameFamilies()),
       g_stats.syncOnlyFrames,
+      g_stats.suppressedRxByteLogs,
       g_stats.frameTruncations,
       g_stats.frameErrors,
       g_stats.parityErrors,
@@ -188,6 +350,8 @@ void printSummary() {
       g_stats.bufferFullEvents,
       g_stats.breakEvents,
       g_stats.unknownEvents);
+
+  printFrameFamilySummaries();
 }
 
 void logEvent(const char *label, uint32_t count) {

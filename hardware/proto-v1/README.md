@@ -17,12 +17,12 @@ Current state:
 - firmware boots and logs correctly on the Waveshare `ESP32-S3-ETH`
 - logic-side receive path has been proven by forced-low testing
 - bridge rectifier and bus-powered `+5V_EBUS` rail have been proven on the live bus
-- no clean live eBUS capture has been achieved yet
+- clean live eBUS capture has now been achieved on the rebuilt node-first prototype
+- repeated standalone `0xAA` sync bytes and structured recurring telegrams are visible
 - the first hole-by-hole breadboard layout is now treated as an archived first pass, not the recommended next build method
 
-The next session should rebuild the front-end in a **node-first** layout, with clearly
-separated and probeable nets for `+VBUS`, `GND_EBUS`, `+5V_EBUS`, `VREF`, `SENSE`,
-`U1A_OUT`, `EBUS_RX`, and `ESP_RX`.
+The next session should focus on **traffic interpretation and smarter firmware framing**,
+not basic analogue bring-up.
 
 ## Contents
 
@@ -30,6 +30,7 @@ separated and probeable nets for `+VBUS`, `GND_EBUS`, `+5V_EBUS`, `VREF`, `SENSE
 - [bom.csv](bom.csv) — authoritative component list; all parts confirmed in hand or arriving
 - [build-notes.md](build-notes.md) — archived first-pass breadboard layout, node notes, and rebuild guidance
 - [bench-tests/2026-03-15-bring-up.md](bench-tests/2026-03-15-bring-up.md) — first live bench session record and outcomes
+- [bench-tests/2026-03-21-live-capture.md](bench-tests/2026-03-21-live-capture.md) — successful live capture after the node-first rebuild
 - [kicad/](kicad/) — KiCad schematic capture for the current bus-powered prototype
 
 ## Key design decisions

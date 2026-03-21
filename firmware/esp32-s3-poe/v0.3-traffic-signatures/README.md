@@ -1,10 +1,8 @@
-# Current Listener Build
+# v0.3 Traffic Signatures
 
-This directory is the latest stable alias for the active listener build.
+This is the second versioned listener iteration after successful live eBUS capture on the Waveshare `ESP32-S3-ETH`.
 
-At the moment it mirrors [../v0.2-sync-framing/README.md](../v0.2-sync-framing/README.md), which is the first versioned iteration after successful live eBUS capture.
-
-This is the current `proto-v1` passive listener build for the Waveshare `ESP32-S3-ETH` board.
+It builds on `v0.2` by making the serial log easier to interpret during early protocol analysis.
 
 ## What this build does
 
@@ -13,6 +11,9 @@ This is the current `proto-v1` passive listener build for the Waveshare `ESP32-S
 - logs each received byte with a microsecond timestamp over USB serial
 - groups bytes into provisional frames using both `0xAA` sync boundaries and an idle-gap timeout
 - suppresses one-byte sync-only `0xAA` frames from the frame log while still counting them in stats
+- suppresses per-byte `[rx]` log spam for sync bytes that only act as frame starts
+- assigns each recurring frame family a short signature based on the first `5` bytes
+- tracks per-family repeat count and inter-arrival timing
 - exposes UART error counters for framing, parity, FIFO overflow, and buffer-full events
 - never configures a transmit pin for the eBUS interface
 
@@ -79,7 +80,8 @@ When the front-end is receiving traffic cleanly, you should then see:
 
 - `[rx]` lines for individual bytes
 - `[frame]` lines when a sync boundary or idle gap closes a provisional frame
-- `[stats]` lines including `sync_only`, which counts standalone `0xAA` sync bytes that were suppressed from the frame log
+- `[stats]` lines including `families`, `sync_only`, and `sync_rx_supp`
+- `[family]` lines summarising repeat count and inter-arrival timing for each observed signature
 
 ## First bring-up sequence
 
@@ -99,8 +101,14 @@ Bench work to date has established that:
 - forced-low testing on `EBUS_RX` produces `break` events as expected
 - clean live eBUS capture has now been achieved with repeated structured traffic and no UART framing/parity errors
 - standalone `0xAA` sync bytes are common on the bus and are now suppressed from the frame log so the structured telegrams are easier to inspect
+- recurring frame families are now the main focus of firmware iteration
 
-The hardware-side record for that session is in [../../../hardware/proto-v1/bench-tests/2026-03-15-bring-up.md](../../../hardware/proto-v1/bench-tests/2026-03-15-bring-up.md).
+## Notes for this version
+
+- `current/` is still the latest stable alias during bring-up.
+- `v0.3` is an analysis-focused iteration that should be promoted to `current/` only after its log output proves more useful than `v0.2` on the live system.
+
+The hardware-side record for the successful live capture session is in [../../../hardware/proto-v1/bench-tests/2026-03-21-live-capture.md](../../../hardware/proto-v1/bench-tests/2026-03-21-live-capture.md).
 
 ## Safety notes
 
