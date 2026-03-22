@@ -1,0 +1,4 @@
+2026-03-22 19:07 compressor start
+2026-03-22 19:10 compressor stop
+
+These times were noted live at the plant and should be treated as approximate minute-resolution event markers.
