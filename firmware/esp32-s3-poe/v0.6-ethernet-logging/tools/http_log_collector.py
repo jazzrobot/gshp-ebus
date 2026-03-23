@@ -84,7 +84,8 @@ def main() -> int:
     since_seq = load_cursor(cursor_path)
 
     with output_path.open("a", encoding="utf-8") as handle:
-        handle.write(f"# collector_started base_url={args.base_url.rstrip('/')} since_seq={since_seq}\n")
+        wall_clock = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
+        handle.write(f"# collector_started base_url={args.base_url.rstrip('/')} since_seq={since_seq} wall_clock={wall_clock}\n")
         handle.flush()
 
         while True:

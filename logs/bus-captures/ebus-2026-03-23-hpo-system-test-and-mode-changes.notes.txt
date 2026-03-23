@@ -1,0 +1,16 @@
+2026-03-23 21:49:00 Tado HPO X System Test started from device menu
+2026-03-23 21:49:10 Tado HPO X System Test completed approximately
+2026-03-23 21:49:10 Tado HPO X System Test started again approximately
+2026-03-23 21:49:20 Tado HPO X System Test completed approximately
+2026-03-23 21:51:00 Heating mode changed from Room Guided to Heat Pump Guided
+2026-03-23 21:52:00 Heat Pump Guided setpoint increased to 30C
+2026-03-23 21:53:00 Bathroom set to 30C
+2026-03-23 21:54:00 Bathroom set to Resume Schedule
+2026-03-23 21:55:00 DHW set to BOOST
+2026-03-23 21:55:00 Heat pump made noises shortly after BOOST, but display showed a 10 minute switch-on delay
+2026-03-23 21:55:00 Heat pump display showed target flow temperature 60C, despite DHW setting 50C
+2026-03-23 21:57:00 Attempted to cancel DHW BOOST, but app did not appear to allow override
+2026-03-23 21:59:00 Heating mode set back to Resume Schedule at 21C
+2026-03-23 22:00:00 Automatic heating schedule change to 18C
+2026-03-23 22:03:00 Heating mode changed from Heat Pump Guided back to Room Guided
+2026-03-23 22:03:00 Observed heat pump activity did not change during this period because it was still on delay start

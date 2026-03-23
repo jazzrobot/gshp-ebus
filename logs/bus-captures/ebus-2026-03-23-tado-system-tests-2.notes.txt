@@ -1,0 +1,17 @@
+2026-03-23 22:14 heating optimisation changed from Standard to Comfort
+2026-03-23 22:18 large clunk heard; possible restart, though the panels did not reboot and there was no obvious follow-on activity
+2026-03-23 22:27 heating optimisation changed from Comfort back to Standard
+2026-03-23 22:27 observed in app that DHW boost was no longer active; DHW showed standby at 30.5C
+2026-03-23 22:30 app action: Turn heating off All rooms
+2026-03-23 22:34 app action: resume schedule all rooms
+2026-03-23 22:37:30 app action: Boost Heating for all rooms; zone circulation pumps started drawing water from the heating buffer cylinder
+2026-03-23 22:39 two Nest-controlled zones engaged as well to accelerate heat draw from the buffer cylinder
+2026-03-23 22:41 heat-pump compressor started
+2026-03-23 22:43 heat-pump display while compressor active: target flow 49C; electrical consumption 2.6kW; cooling capacity 11.2kW; env circuit outlet 6.2C; env circuit inlet 9.5C; energy integral -88 deg/min; current flow temp 31.6C and climbing; env circuit pressure 1.6bar; building circuit pressure 2.0bar
+2026-03-23 22:47 Nest demand stopped
+2026-03-23 22:48 Tado demand stopped by resuming schedule for all rooms
+2026-03-23 22:53 heat-pump compressor stopped
+2026-03-23 22:55 GSHP immersion-heater breaker physically switched back on
+2026-03-23 22:55 heat-pump error F.1120 "immersionheater phase failure" cleared immediately
+2026-03-23 22:57 side controller reset manually
+2026-03-23 23:00 capture snapshotted and rotated

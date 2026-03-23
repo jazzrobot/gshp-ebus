@@ -19,6 +19,10 @@ Current analysis notes:
 - [2026-03-21-to-2026-03-22-overnight-time-anchors.csv](2026-03-21-to-2026-03-22-overnight-time-anchors.csv) - wall-clock anchors recovered from the confirmed on-bus Vaillant date/time broadcast
 - [2026-03-22-decode-priorities.md](2026-03-22-decode-priorities.md) - current decode shortlist and working model after the overnight run
 - [2026-03-22-compressor-cycle-1907-1910-analysis.md](2026-03-22-compressor-cycle-1907-1910-analysis.md) - first labelled event analysis using a user-observed compressor start and stop
+- [2026-03-23-tado-system-tests-analysis.md](2026-03-23-tado-system-tests-analysis.md) - labelled HPO device-test, mode-change, setpoint, and DHW actions mapped against the live bus capture
+- [2026-03-23-tado-system-tests-time-anchors.csv](2026-03-23-tado-system-tests-time-anchors.csv) - minute-by-minute wall-clock anchors for the `2026-03-23` Tado intervention run
+- [2026-03-23-tado-system-tests-2-analysis.md](2026-03-23-tado-system-tests-2-analysis.md) - labelled optimisation, demand, compressor, immersion, and side-controller-reset analysis from the second intervention run
+- [2026-03-23-tado-system-tests-2-time-anchors.csv](2026-03-23-tado-system-tests-2-time-anchors.csv) - minute-by-minute wall-clock anchors for the second `2026-03-23` intervention run
 
 Tools:
 
